@@ -23,4 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Yamllint (template only, skeleton uses Nunjucks)
-        run: pip install yamllint==1.35.1 && yamllint -d "{extends: relaxed, rules: {line-length: disable}}" templates/python-service/template.yaml
+        run: |
+          pip install yamllint==1.35.1
+          yamllint -d "{extends: relaxed, rules: {line-length: disable}}" templates/python-service/template.yaml
