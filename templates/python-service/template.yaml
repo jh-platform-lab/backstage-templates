@@ -109,12 +109,17 @@ spec:
         name: ${{ parameters.name }}
         org: jh-platform-lab
 
-    # 2. Genera los archivos a partir del skeleton, segun el tipo de servicio.
+    # 2. Genera los archivos a partir del skeleton. Hoy hay un solo skeleton para los dos tipos
+    #    (lambda y k8s): se generan ambos Dockerfile. Definido en: wenia-platform/docs/sustentacion.md, secciones 2 y 4.
     - id: fetch
       name: Generar el codigo
       action: fetch:template
       input:
         url: ./skeleton
+        # Los workflows usan la sintaxis de expresiones de GitHub (dolar y llaves dobles), igual a la de
+        # Nunjucks: se copian tal cual para que Backstage no los interprete.
+        copyWithoutRender:
+          - .github/workflows/*
         values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}

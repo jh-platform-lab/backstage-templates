@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: ${{ values.name }}
+  description: ${{ values.description | dump }}
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Liveness check
+      responses:
+        "200":
+          description: Service is up
+{%- for api in values.apis %}
+  ${{ api.path }}:
+    ${{ api.method | lower }}:
+      operationId: ${{ api.name }}
+      summary: ${{ api.name }}
+      responses:
+        "200":
+          description: OK
+{%- endfor %}

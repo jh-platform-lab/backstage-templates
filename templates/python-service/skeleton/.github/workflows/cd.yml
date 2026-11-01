@@ -1,0 +1,39 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - id: kind
+        run: echo "type=$(cat deploy/service-type)" >> "$GITHUB_OUTPUT"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ github.sha }}
+        run: |
+          FILE=Dockerfile
+          if [ "${{ steps.kind.outputs.type }}" = "lambda" ]; then FILE=Dockerfile.lambda; fi
+          docker build -f "$FILE" -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Deploy Lambda
+        if: steps.kind.outputs.type == 'lambda'
+        run: aws lambda update-function-code --function-name "${{ github.event.repository.name }}" --image-uri "$IMAGE"
+      - name: Deploy Kubernetes
+        if: steps.kind.outputs.type == 'k8s'
+        run: echo "Pendiente - kubectl set image cuando exista el cluster EKS (se hace en la sesion de AWS)"
