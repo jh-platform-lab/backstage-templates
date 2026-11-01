@@ -6,52 +6,57 @@ ${{ values.description }}
 |---|---|
 | Equipo propietario | `${{ values.owner }}` |
 | Tipo de servicio | `${{ values.serviceType }}` |
-| Lenguaje | Python 3.12 (FastAPI) |
+| Lenguaje | {% if values.language == 'python' %}Python 3.12 (FastAPI){% else %}Node.js 24 (Express){% endif %} |
 | Versión de la plantilla | `${{ values.templateVersion }}` (anotación `wenia.io/template-version` del catálogo) |
 
 ## Qué se creó
 
 | Archivo o carpeta | Para qué sirve |
 |---|---|
-| `app/main.py` | Servicio FastAPI: `/health` y una función por cada ruta del formulario |
+| {% if values.language == 'python' %}`app/main.py` | Servicio FastAPI{% else %}`src/app.js` | Servicio Express{% endif %}: `/health` y una ruta por cada operación del formulario |
 | `openapi.yaml`, `catalog-info.yaml` | Contrato de la API y registro en el catálogo de Backstage (Component y API) |
 | `Dockerfile` | Imagen para Kubernetes: usuario sin privilegios, `HEALTHCHECK`, agente de New Relic |
-| `Dockerfile.lambda` | Imagen para AWS Lambda (adaptador Mangum) |
-| `tests/` | Pruebas unitarias con pytest |
+| `Dockerfile.lambda` | Imagen para AWS Lambda ({% if values.language == 'python' %}adaptador Mangum{% else %}adaptador serverless-http{% endif %}) |
+| {% if values.language == 'python' %}`tests/` | Pruebas unitarias con pytest{% else %}`test/` | Pruebas con el runner nativo de Node (`node --test`){% endif %} |
 | `.github/workflows/ci.yml` | **CI**: valida, no publica nada |
 | `.github/workflows/cd.yml` | **CD**: publica la imagen y despliega (solo en `main`) |
 | `k8s/` | Deployment (2 réplicas, probes, `securityContext` restrictivo) y Service para el tipo Kubernetes |
 | `scripts/kind-deploy.sh` | Despliega `k8s/` en un cluster Kind local y lo prueba con curl |
 | `terraform/` | ECR, rol OIDC de CD y, para Lambda, la función con su URL pública |
 | `observability/newrelic/` | Alertas y dashboard de New Relic como código |
-| `newrelic.ini` | Configuración del agente APM (servicio sobre Kubernetes) |
+| {% if values.language == 'python' %}`newrelic.ini`{% else %}`newrelic.js`{% endif %} | Configuración del agente APM (servicio sobre Kubernetes) |
 
 Rutas generadas (devuelven `501 Not implemented` hasta que escribas su lógica):
 
-| Método | Ruta | Función |
+| Método | Ruta | Operación |
 |---|---|---|
 | GET | `/health` | `health` (ya implementada) |
 {%- for api in values.apis %}
-| ${{ api.method }} | `${{ api.path }}` | `${{ api.name | replace('-', '_') }}` |
+| ${{ api.method }} | `${{ api.path }}` | `${{ api.name }}` |
 {%- endfor %}
 
 ## Desarrollar
 
-```bash
+{% if values.language == 'python' %}```bash
 python3.12 -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload          # http://127.0.0.1:8000/docs
 ```
+{% else %}```bash
+npm ci
+npm run dev                            # http://127.0.0.1:8000/health
+```
+{% endif %}
 
-Para implementar una ruta, edita su función en `app/main.py`, actualiza `openapi.yaml` si cambia el contrato y agrega su prueba en `tests/`.
+Para implementar una ruta, edita su {% if values.language == 'python' %}función en `app/main.py`{% else %}handler en `src/app.js`{% endif %}, actualiza `openapi.yaml` si cambia el contrato y agrega su prueba en {% if values.language == 'python' %}`tests/`{% else %}`test/`{% endif %}.
 
 ## Verificar
 
 | Qué | Comando |
 |---|---|
-| Pruebas | `pytest -q` |
-| Seguridad del código | `bandit -r app` |
-| Dependencias vulnerables | `pip-audit -r requirements.txt` |
+| Pruebas | {% if values.language == 'python' %}`pytest -q`{% else %}`npm test`{% endif %} |
+| Seguridad del código | {% if values.language == 'python' %}`bandit -r app`{% else %}Sin analizador estático propio: cubre `npm audit` y el análisis de gitleaks{% endif %} |
+| Dependencias vulnerables | {% if values.language == 'python' %}`pip-audit -r requirements.txt`{% else %}`npm audit --omit=dev --audit-level=high`{% endif %} |
 | Secretos en el repo | `docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --no-banner` |
 | Imagen (K8S) | `docker build -f Dockerfile -t ${{ values.name }} . && docker run --rm -p 8000:8000 ${{ values.name }}` |
 | Imagen (Lambda) | `docker build -f Dockerfile.lambda -t ${{ values.name }}-lambda .` |
@@ -93,9 +98,9 @@ New Relic para Lambda requiere la extensión de New Relic, que no se incluye en 
 
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
-| Una ruta responde `501 Not implemented` | Es el stub generado | Escribe la lógica en `app/main.py` |
+| Una ruta responde `501 Not implemented` | Es el stub generado | Escribe la lógica en {% if values.language == 'python' %}`app/main.py`{% else %}`src/app.js`{% endif %} |
 | CI: falla `secrets` | Gitleaks encontró un secreto | Revoca la credencial, elimínala del historial y vuelve a empujar. No basta con borrar el archivo |
-| CI: falla `pip-audit` | Dependencia con vulnerabilidad conocida | Sube la versión en `requirements.txt` y prueba de nuevo |
+| CI: falla {% if values.language == 'python' %}`pip-audit`{% else %}`npm audit`{% endif %} | Dependencia con vulnerabilidad conocida | Sube la versión en {% if values.language == 'python' %}`requirements.txt`{% else %}`package.json` y regenera `package-lock.json`{% endif %} y prueba de nuevo |
 | CI: `image` falla en "Set up job" | Etiqueta de una acción de GitHub inexistente | Revisa la versión del `uses:` en el workflow |
 | CI: `image` falla en Trivy | Vulnerabilidad HIGH o CRITICAL con arreglo disponible | Actualiza la imagen base o la dependencia |
 | CD: `Could not assume role` | Falta `AWS_ROLE_ARN`, o el rol no confía en este repo y entorno | Revisa la variable y que el entorno sea `production`; el rol solo acepta `repo:<org>/${{ values.name }}:environment:production` |
@@ -103,8 +108,8 @@ New Relic para Lambda requiere la extensión de New Relic, que no se incluye en 
 | Terraform no crea la Lambda | `image_uri` vacío a propósito | Pasa `-var image_uri=<url ECR>:<sha>` |
 | La URL de la Lambda responde 403 | Faltan los dos permisos públicos de la URL | Reaplica Terraform: `FunctionURLAllowPublicAccess` y `FunctionURLAllowInvokeAction` |
 | Kind: el pod queda en `ImagePullBackOff` | La imagen `${{ values.name }}:local` no está cargada en el cluster | Vuelve a correr `bash scripts/kind-deploy.sh` (construye y la carga con `kind load`) |
-| El contenedor queda `unhealthy` | `/health` no responde | `docker logs <contenedor>` y revisa el arranque de uvicorn |
-| New Relic no muestra datos | Falta `NEW_RELIC_LICENSE_KEY` | Define el Secret y reinicia; el log del agente (`New Relic Python Agent`) indica si arrancó |
+| El contenedor queda `unhealthy` | `/health` no responde | `docker logs <contenedor>` y revisa el arranque del servidor ({% if values.language == 'python' %}uvicorn{% else %}node{% endif %}) |
+| New Relic no muestra datos | Falta `NEW_RELIC_LICENSE_KEY` | Define el Secret y reinicia; el log del agente (`New Relic {% if values.language == 'python' %}Python{% else %}Node.js{% endif %} Agent`) indica si arrancó |
 
 ## Evolución de la plantilla
 
