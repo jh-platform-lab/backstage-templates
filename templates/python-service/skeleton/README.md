@@ -20,6 +20,8 @@ ${{ values.description }}
 | `tests/` | Pruebas unitarias con pytest |
 | `.github/workflows/ci.yml` | **CI**: valida, no publica nada |
 | `.github/workflows/cd.yml` | **CD**: publica la imagen y despliega (solo en `main`) |
+| `k8s/` | Deployment (2 réplicas, probes, `securityContext` restrictivo) y Service para el tipo Kubernetes |
+| `scripts/kind-deploy.sh` | Despliega `k8s/` en un cluster Kind local y lo prueba con curl |
 | `terraform/` | ECR, rol OIDC de CD y, para Lambda, la función con su URL pública |
 | `observability/newrelic/` | Alertas y dashboard de New Relic como código |
 | `newrelic.ini` | Configuración del agente APM (servicio sobre Kubernetes) |
@@ -53,6 +55,7 @@ Para implementar una ruta, edita su función en `app/main.py`, actualiza `openap
 | Secretos en el repo | `docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --no-banner` |
 | Imagen (K8S) | `docker build -f Dockerfile -t ${{ values.name }} . && docker run --rm -p 8000:8000 ${{ values.name }}` |
 | Imagen (Lambda) | `docker build -f Dockerfile.lambda -t ${{ values.name }}-lambda .` |
+| Kubernetes (local) | `bash scripts/kind-deploy.sh` crea el cluster Kind `local-dev`, despliega y hace `curl /health`; `--delete` lo borra |
 | Terraform | en `terraform/`: `terraform fmt -check`, `terraform init -backend=false`, `terraform validate` |
 
 El CI ejecuta lo mismo en cada PR: `test`, `terraform`, `secrets` e `image` (con escaneo Trivy de HIGH y CRITICAL).
@@ -73,7 +76,7 @@ Desde entonces cada push a `main` publica una imagen etiquetada con el SHA y, en
 | Tipo | Qué hace el CD hoy |
 |---|---|
 | `lambda` | Publica la imagen en ECR y ejecuta `update-function-code` |
-| `k8s` | Publica la imagen en ECR. El despliegue al cluster es un marcador: se completa cuando exista el cluster |
+| `k8s` | Publica la imagen en ECR. En local, `scripts/kind-deploy.sh` despliega `k8s/` en Kind. El paso de despliegue a EKS del CD sigue siendo un marcador hasta que exista el cluster |
 
 ### Observabilidad
 
@@ -99,6 +102,7 @@ New Relic para Lambda requiere la extensión de New Relic, que no se incluye en 
 | CD: falla "Deploy Lambda" la primera vez | La función aún no existe | Haz el paso 4 del primer despliegue |
 | Terraform no crea la Lambda | `image_uri` vacío a propósito | Pasa `-var image_uri=<url ECR>:<sha>` |
 | La URL de la Lambda responde 403 | Faltan los dos permisos públicos de la URL | Reaplica Terraform: `FunctionURLAllowPublicAccess` y `FunctionURLAllowInvokeAction` |
+| Kind: el pod queda en `ImagePullBackOff` | La imagen `${{ values.name }}:local` no está cargada en el cluster | Vuelve a correr `bash scripts/kind-deploy.sh` (construye y la carga con `kind load`) |
 | El contenedor queda `unhealthy` | `/health` no responde | `docker logs <contenedor>` y revisa el arranque de uvicorn |
 | New Relic no muestra datos | Falta `NEW_RELIC_LICENSE_KEY` | Define el Secret y reinicia; el log del agente (`New Relic Python Agent`) indica si arrancó |
 
