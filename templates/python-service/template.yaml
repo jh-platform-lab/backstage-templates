@@ -117,8 +117,9 @@ spec:
       input:
         url: ./skeleton
         # Los workflows usan la sintaxis de expresiones de GitHub (dolar y llaves dobles), igual a la de
-        # Nunjucks: se copian tal cual para que Backstage no los interprete.
-        copyWithoutRender:
+        # Nunjucks: se copian tal cual para que Backstage no los interprete. En esta version de
+        # Backstage solo copyWithoutTemplating surte efecto (copyWithoutRender se ignora).
+        copyWithoutTemplating:
           - .github/workflows/*
         values:
           name: ${{ parameters.name }}
