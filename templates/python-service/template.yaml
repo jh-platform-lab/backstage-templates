@@ -1,0 +1,153 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: python-service
+  title: Microservicio Python (FastAPI)
+  description: >-
+    Genera un microservicio listo para trabajar: repo en GitHub, registro en el catalogo
+    de servicios y de APIs, Dockerfile, CI/CD, Terraform, observabilidad y documentacion.
+  tags:
+    - python
+    - fastapi
+    - wenia
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  # Validacion: JSON Schema. Backstage rechaza el formulario con un mensaje claro ANTES de
+  # ejecutar ningun paso, asi una solicitud invalida nunca llega a crear nada.
+  parameters:
+    - title: Datos del servicio
+      required:
+        - name
+        - description
+        - owner
+        - serviceType
+      properties:
+        name:
+          title: Nombre del servicio
+          type: string
+          description: Formato DNS, en minusculas, de 3 a 40 caracteres. Ejemplo, onboarding-api
+          pattern: '^[a-z][a-z0-9-]{1,38}[a-z0-9]$'
+          maxLength: 40
+          ui:autofocus: true
+        language:
+          title: Lenguaje
+          type: string
+          description: Hoy solo Python. Node.js queda como evolucion de la plantilla.
+          enum:
+            - python
+          default: python
+        description:
+          title: Descripcion
+          type: string
+          minLength: 10
+          maxLength: 200
+        owner:
+          title: Equipo propietario
+          type: string
+          description: Lista cerrada de equipos.
+          enum:
+            - platform-team
+            - payments-team
+            - growth-team
+        serviceType:
+          title: Tipo de servicio
+          type: string
+          description: Lambda con Function URL, o un servicio sobre Kubernetes.
+          enum:
+            - lambda
+            - k8s
+          enumNames:
+            - AWS Lambda (imagen de contenedor)
+            - Kubernetes (EKS)
+
+    - title: APIs del servicio
+      required:
+        - apis
+      properties:
+        apis:
+          title: Metodos de la API
+          type: array
+          minItems: 1
+          maxItems: 10
+          description: Cada metodo genera una ruta y su entrada en el openapi.yaml.
+          items:
+            type: object
+            required:
+              - name
+              - method
+              - path
+            properties:
+              name:
+                title: Nombre de la operacion
+                type: string
+                pattern: '^[a-z][a-z0-9-]{1,30}$'
+              method:
+                title: Metodo HTTP
+                type: string
+                enum:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+              path:
+                title: Ruta
+                type: string
+                description: Empieza con /. Ejemplo, /services/{id}
+                pattern: '^/[a-zA-Z0-9/{}_-]*$'
+                maxLength: 80
+
+  steps:
+    # 1. Duplicados: consulta el catalogo y GitHub. Si el nombre existe, la tarea falla
+    #    aqui y no se crea nada. (Accion propia, se implementa en wenia-actions.)
+    - id: check-duplicate
+      name: Verificar que el nombre no exista
+      action: wenia:check-duplicate
+      input:
+        name: ${{ parameters.name }}
+        org: jh-platform-lab
+
+    # 2. Genera los archivos a partir del skeleton, segun el tipo de servicio.
+    - id: fetch
+      name: Generar el codigo
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          serviceType: ${{ parameters.serviceType }}
+          apis: ${{ parameters.apis }}
+          templateVersion: 1.0.0
+
+    # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
+    - id: publish
+      name: Crear el repositorio en GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=jh-platform-lab&repo=${{ parameters.name }}
+        description: ${{ parameters.description }}
+        defaultBranch: main
+        repoVisibility: public
+
+    # 4. Registra Component y API en el catalogo.
+    #    PENDIENTE: compensacion. Si este paso falla despues de publicar, el repo queda
+    #    huerfano. Se resuelve con una accion propia que registra y, ante un fallo, borra
+    #    el repo creado por esta tarea (wenia:rollback-repo).
+    - id: register
+      name: Registrar en el catalogo
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+
+  output:
+    links:
+      - title: Repositorio
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Abrir en el catalogo
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}

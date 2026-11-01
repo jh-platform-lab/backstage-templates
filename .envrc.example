@@ -1,0 +1,2 @@
+# Plantilla versionada. Dentro de Wenia/ direnv ya usa el .envrc de la carpeta padre.
+source_up_if_exists
