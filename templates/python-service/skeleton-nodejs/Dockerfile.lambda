@@ -1,0 +1,11 @@
+# Imagen para AWS Lambda (Function URL). Para Kubernetes ver Dockerfile.
+# La arquitectura de la imagen debe coincidir con la de la funcion (arm64 o x86_64).
+FROM public.ecr.aws/lambda/nodejs:24
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+COPY src ./src
+
+# archivo.exportacion: src/lambda.js exporta "handler" (serverless-http).
+CMD ["src/lambda.handler"]

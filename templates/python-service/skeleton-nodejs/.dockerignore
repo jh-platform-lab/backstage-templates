@@ -1,0 +1,11 @@
+node_modules
+test
+.git
+.github
+terraform
+observability
+k8s
+scripts
+*.md
+.env
+.env.*

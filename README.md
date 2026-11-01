@@ -6,16 +6,17 @@ Plantillas de autoservicio de Backstage para el reto técnico de Wenia. Cada pla
 
 | Plantilla | Descripción |
 |---|---|
-| `python-service` | Microservicio FastAPI, desplegable como AWS Lambda o en Kubernetes |
+| `python-service` | Microservicio en Python (FastAPI) o Node.js (Express), desplegable como AWS Lambda o en Kubernetes |
 
 ## Estructura
 
 templates/<nombre>/template.yaml   # formulario, validación y pasos
-templates/<nombre>/skeleton/       # archivos que se generan
+templates/<nombre>/skeleton-common/  # archivos iguales para todos los lenguajes (Terraform, K8S, CD, observabilidad)
+templates/<nombre>/skeleton-<lenguaje>/  # app, Dockerfile, pruebas y CI de cada lenguaje
 
 ## Cómo agregar una plantilla
 
-1. Crear `templates/<nombre>/` con su `template.yaml` y su `skeleton/`.
+1. Crear `templates/<nombre>/` con su `template.yaml` y sus carpetas `skeleton-*`.
 2. Registrarla en el catálogo de Backstage.
 3. Anotar el cambio en `CHANGELOG.md`.
 
