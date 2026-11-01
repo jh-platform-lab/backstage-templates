@@ -138,6 +138,10 @@ spec:
         description: ${{ parameters.description }}
         defaultBranch: main
         repoVisibility: public
+        # La accion protege la rama por defecto con 1 aprobacion obligatoria (incluso a admins).
+        # Un equipo de una persona queda bloqueado, asi que aqui se desactiva. Evolucion:
+        # activarlo por equipo con un campo del formulario.
+        protectDefaultBranch: false
 
     # 4. Registra Component y API en el catalogo, con compensacion: si el registro falla despues
     #    de publicar, la propia accion borra el repo creado por esta tarea y la tarea queda
