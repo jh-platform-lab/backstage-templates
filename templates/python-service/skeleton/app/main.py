@@ -11,7 +11,7 @@ def health():
 {% for api in values.apis %}
 
 @app.${{ api.method | lower }}("${{ api.path }}")
-def ${{ api.name | replace('-', '_') }}():
+def ${{ api.name | replace('-', '_') }}({% for seg in api.path.split('/') %}{% if seg.startsWith('{') %}${{ seg | replace('{', '') | replace('}', '') }}: str, {% endif %}{% endfor %}):
     raise HTTPException(status_code=501, detail="Not implemented")
 {% endfor %}
 
