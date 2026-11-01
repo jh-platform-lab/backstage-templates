@@ -110,7 +110,7 @@ spec:
         org: jh-platform-lab
 
     # 2. Genera los archivos a partir del skeleton. Hoy hay un solo skeleton para los dos tipos
-    #    (lambda y k8s): se generan ambos Dockerfile. Definido en: wenia-platform/docs/sustentacion.md, secciones 2 y 4.
+    #    (lambda y k8s): se generan ambos Dockerfile.
     - id: fetch
       name: Generar el codigo
       action: fetch:template
@@ -146,7 +146,7 @@ spec:
     # 4. Registra Component y API en el catalogo, con compensacion: si el registro falla despues
     #    de publicar, la propia accion borra el repo creado por esta tarea y la tarea queda
     #    fallida. Los pasos del scaffolder no tienen "on failure", por eso la compensacion vive
-    #    dentro de una sola accion. Definido en: wenia-platform/docs/sustentacion.md, seccion 4e.
+    #    dentro de una sola accion.
     - id: register
       name: Registrar en el catalogo
       action: wenia:register-or-rollback
