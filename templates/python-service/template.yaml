@@ -139,16 +139,18 @@ spec:
         defaultBranch: main
         repoVisibility: public
 
-    # 4. Registra Component y API en el catalogo.
-    #    PENDIENTE: compensacion. Si este paso falla despues de publicar, el repo queda
-    #    huerfano. Se resuelve con una accion propia que registra y, ante un fallo, borra
-    #    el repo creado por esta tarea (wenia:rollback-repo).
+    # 4. Registra Component y API en el catalogo, con compensacion: si el registro falla despues
+    #    de publicar, la propia accion borra el repo creado por esta tarea y la tarea queda
+    #    fallida. Los pasos del scaffolder no tienen "on failure", por eso la compensacion vive
+    #    dentro de una sola accion. Definido en: wenia-platform/docs/sustentacion.md, seccion 4e.
     - id: register
       name: Registrar en el catalogo
-      action: catalog:register
+      action: wenia:register-or-rollback
       input:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: /catalog-info.yaml
+        org: jh-platform-lab
+        name: ${{ parameters.name }}
 
   output:
     links:
