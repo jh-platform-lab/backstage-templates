@@ -27,13 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Terraform fmt, init and validate
+      - name: Terraform fmt, init and validate (infra and observability)
         run: |
-          TF="docker run --rm -v $PWD/terraform:/w -w /w hashicorp/terraform:1.12"
-          $TF fmt -check -diff
-          $TF init -backend=false -input=false
-          $TF validate
-      - name: Checkov
+          for dir in terraform observability/newrelic; do
+            TF="docker run --rm -v $PWD/$dir:/w -w /w hashicorp/terraform:1.12"
+            $TF fmt -check -diff
+            $TF init -backend=false -input=false
+            $TF validate
+          done
+      - name: Checkov (AWS infrastructure)
         run: docker run --rm -v "$PWD/terraform:/tf" bridgecrew/checkov:3.4.0 -d /tf --framework terraform --compact
 
   secrets:
