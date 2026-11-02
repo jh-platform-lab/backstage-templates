@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.4 (python-service)
+
+- CD: el primer `terraform apply` (ECR y rol) usa `-target=module.ecr -target=module.cd_role`. Sin el target, `image_uri` vacío ponía `count=0` en el módulo Lambda y un reintento (o un segundo despliegue) destruía la Lambda y su rol.
+
 ## 1.6.3 (python-service)
 
 - CI: job `kind` que despliega los manifiestos en un cluster Kind dentro del runner y prueba `/health`. La documentación aclara que el despliegue real a EKS es el siguiente paso.

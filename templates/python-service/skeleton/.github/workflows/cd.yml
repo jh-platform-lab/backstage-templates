@@ -39,7 +39,7 @@ jobs:
                 -backend-config="key=$SERVICE/terraform.tfstate" \
                 -backend-config="region=us-east-1" \
                 -backend-config="use_lockfile=true" &&
-              terraform apply -input=false -auto-approve'
+              terraform apply -input=false -auto-approve -target=module.ecr -target=module.cd_role'
 
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
