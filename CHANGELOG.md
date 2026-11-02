@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.0
+
+- Una card por plantilla: `python-service` (FastAPI) y `nodejs-service` (Express), cada una en su carpeta autocontenida (`template.yaml` + `skeleton/`). Desaparece el campo `language` del formulario.
+- Se eliminan `skeleton-common`, `skeleton-python` y `skeleton-nodejs`; el contenido generado no cambia.
+
 ## 1.1.0
 
 - Nuevo lenguaje: Node.js 24 (Express). El campo `language` acepta `python` o `nodejs`.
