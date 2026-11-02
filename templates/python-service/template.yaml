@@ -2,15 +2,13 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: python-service
-  title: Microservicio (Python o Node.js)
+  title: Microservicio Python (FastAPI)
   description: >-
     Genera un microservicio listo para trabajar: repo en GitHub, registro en el catalogo
     de servicios y de APIs, Dockerfile, CI/CD, Terraform, observabilidad y documentacion.
   tags:
     - python
-    - nodejs
     - fastapi
-    - express
     - wenia
 spec:
   owner: group:default/platform-team
@@ -33,17 +31,6 @@ spec:
           pattern: '^[a-z][a-z0-9-]{1,38}[a-z0-9]$'
           maxLength: 40
           ui:autofocus: true
-        language:
-          title: Lenguaje
-          type: string
-          description: Python usa FastAPI y Node.js usa Express. Los dos generan lo mismo (Terraform, K8S, CI/CD, observabilidad).
-          enum:
-            - python
-            - nodejs
-          enumNames:
-            - Python 3.12 (FastAPI)
-            - Node.js 24 (Express)
-          default: python
         description:
           title: Descripcion
           type: string
@@ -115,49 +102,26 @@ spec:
         name: ${{ parameters.name }}
         org: jh-platform-lab
 
-    # 2. Genera los archivos en tres pasos. skeleton-common es igual para todos los lenguajes
-    #    (Terraform, K8S, observabilidad, CD, catalogo, OpenAPI); skeleton-python o skeleton-nodejs
-    #    aportan la app, los Dockerfile, las pruebas y el CI. Los dos Dockerfile (lambda y k8s) se
-    #    generan siempre; el tipo de servicio solo decide cual usa el CD.
-    #    Los workflows usan la sintaxis de expresiones de GitHub (dolar y llaves dobles), igual a la de
-    #    Nunjucks: se copian tal cual. En esta version de Backstage solo copyWithoutTemplating surte
-    #    efecto (copyWithoutRender se ignora). Los lockfiles tambien se copian sin plantilla.
-    - id: fetch-common
-      name: Generar los archivos comunes
+    # 2. Genera los archivos desde ./skeleton (Terraform, K8S, observabilidad, CD, catalogo, OpenAPI y la
+    #    app FastAPI). Los dos Dockerfile (lambda y k8s) se generan siempre; el tipo de servicio solo
+    #    decide cual usa el CD. Los workflows usan la sintaxis de expresiones de GitHub, igual a la de
+    #    Nunjucks: se copian tal cual con copyWithoutTemplating (copyWithoutRender se ignora en esta
+    #    version de Backstage). Los lockfiles tambien se copian sin plantilla.
+    - id: fetch
+      name: Generar los archivos del servicio
       action: fetch:template
       input:
-        url: ./skeleton-common
+        url: ./skeleton
         copyWithoutTemplating:
           - .github/workflows/*
-        values: &values
+        values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
           owner: ${{ parameters.owner }}
           serviceType: ${{ parameters.serviceType }}
-          language: ${{ parameters.language }}
+          language: python
           apis: ${{ parameters.apis }}
-          templateVersion: 1.1.0
-
-    - id: fetch-python
-      name: Generar el codigo Python
-      if: ${{ parameters.language === 'python' }}
-      action: fetch:template
-      input:
-        url: ./skeleton-python
-        copyWithoutTemplating:
-          - .github/workflows/*
-        values: *values
-
-    - id: fetch-nodejs
-      name: Generar el codigo Node.js
-      if: ${{ parameters.language === 'nodejs' }}
-      action: fetch:template
-      input:
-        url: ./skeleton-nodejs
-        copyWithoutTemplating:
-          - .github/workflows/*
-          - package-lock.json
-        values: *values
+          templateVersion: 1.2.0
 
     # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
     - id: publish

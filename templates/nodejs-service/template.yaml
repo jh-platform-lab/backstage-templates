@@ -1,0 +1,160 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: nodejs-service
+  title: Microservicio Node.js (Express)
+  description: >-
+    Genera un microservicio listo para trabajar: repo en GitHub, registro en el catalogo
+    de servicios y de APIs, Dockerfile, CI/CD, Terraform, observabilidad y documentacion.
+  tags:
+    - nodejs
+    - express
+    - wenia
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  # Validacion: JSON Schema. Backstage rechaza el formulario con un mensaje claro ANTES de
+  # ejecutar ningun paso, asi una solicitud invalida nunca llega a crear nada.
+  parameters:
+    - title: Datos del servicio
+      required:
+        - name
+        - description
+        - owner
+        - serviceType
+      properties:
+        name:
+          title: Nombre del servicio
+          type: string
+          description: Formato DNS, en minusculas, de 3 a 40 caracteres. Ejemplo, onboarding-api
+          pattern: '^[a-z][a-z0-9-]{1,38}[a-z0-9]$'
+          maxLength: 40
+          ui:autofocus: true
+        description:
+          title: Descripcion
+          type: string
+          minLength: 10
+          maxLength: 200
+        owner:
+          title: Equipo propietario
+          type: string
+          description: Lista cerrada de equipos.
+          enum:
+            - platform-team
+            - payments-team
+            - growth-team
+        serviceType:
+          title: Tipo de servicio
+          type: string
+          description: Lambda con Function URL, o un servicio sobre Kubernetes.
+          enum:
+            - lambda
+            - k8s
+          enumNames:
+            - AWS Lambda (imagen de contenedor)
+            - Kubernetes (EKS)
+
+    - title: APIs del servicio
+      required:
+        - apis
+      properties:
+        apis:
+          title: Metodos de la API
+          type: array
+          minItems: 1
+          maxItems: 10
+          description: Cada metodo genera una ruta y su entrada en el openapi.yaml.
+          items:
+            type: object
+            required:
+              - name
+              - method
+              - path
+            properties:
+              name:
+                title: Nombre de la operacion
+                type: string
+                pattern: '^[a-z][a-z0-9-]{1,30}$'
+              method:
+                title: Metodo HTTP
+                type: string
+                enum:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+              path:
+                title: Ruta
+                type: string
+                description: Empieza con /. Ejemplo, /services/{id}
+                pattern: '^/[a-zA-Z0-9/{}_-]*$'
+                maxLength: 80
+
+  steps:
+    # 1. Duplicados: consulta el catalogo y GitHub. Si el nombre existe, la tarea falla
+    #    aqui y no se crea nada. (Accion propia, se implementa en wenia-actions.)
+    - id: check-duplicate
+      name: Verificar que el nombre no exista
+      action: wenia:check-duplicate
+      input:
+        name: ${{ parameters.name }}
+        org: jh-platform-lab
+
+    # 2. Genera los archivos desde ./skeleton (Terraform, K8S, observabilidad, CD, catalogo, OpenAPI y la
+    #    app Express). Los dos Dockerfile (lambda y k8s) se generan siempre; el tipo de servicio solo
+    #    decide cual usa el CD. Los workflows usan la sintaxis de expresiones de GitHub, igual a la de
+    #    Nunjucks: se copian tal cual con copyWithoutTemplating (copyWithoutRender se ignora en esta
+    #    version de Backstage). Los lockfiles tambien se copian sin plantilla.
+    - id: fetch
+      name: Generar los archivos del servicio
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutTemplating:
+          - .github/workflows/*
+          - package-lock.json
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          serviceType: ${{ parameters.serviceType }}
+          language: nodejs
+          apis: ${{ parameters.apis }}
+          templateVersion: 1.2.0
+
+    # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
+    - id: publish
+      name: Crear el repositorio en GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=jh-platform-lab&repo=${{ parameters.name }}
+        description: ${{ parameters.description }}
+        defaultBranch: main
+        repoVisibility: public
+        # La accion protege la rama por defecto con 1 aprobacion obligatoria (incluso a admins).
+        # Un equipo de una persona queda bloqueado, asi que aqui se desactiva. Evolucion:
+        # activarlo por equipo con un campo del formulario.
+        protectDefaultBranch: false
+
+    # 4. Registra Component y API en el catalogo, con compensacion: si el registro falla despues
+    #    de publicar, la propia accion borra el repo creado por esta tarea y la tarea queda
+    #    fallida. Los pasos del scaffolder no tienen "on failure", por eso la compensacion vive
+    #    dentro de una sola accion.
+    - id: register
+      name: Registrar en el catalogo
+      action: wenia:register-or-rollback
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+        org: jh-platform-lab
+        name: ${{ parameters.name }}
+
+  output:
+    links:
+      - title: Repositorio
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Abrir en el catalogo
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
