@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1
+
+- Corrige la tabla de propiedades de la documentación: las variables del formulario se mostraban sin reemplazar.
+- Nueva página **APIs** en la documentación de los servicios: cada ruta con su ejemplo en `curl` y la verificación de `/health`.
+
 ## 1.5.0
 
 - Documentación TechDocs completa en los servicios Python, Node.js, Go y Java: arquitectura con diagramas Mermaid, desarrollo y verificación, operación y CI/CD, troubleshooting, observabilidad y evolución de la plantilla.
