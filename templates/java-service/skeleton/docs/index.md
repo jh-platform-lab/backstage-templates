@@ -4,11 +4,11 @@ ${{ values.description }}
 
 | | |
 |---|---|
-| Propietario | `${ values.owner }` |
-| Tipo de servicio | `${ values.serviceType }` |
+| Propietario | `${{ values.owner }}` |
+| Tipo de servicio | `${{ values.serviceType }}` |
 | Lenguaje | Java 21 (Spring Boot 3) |
-| Versión de la plantilla | `${ values.templateVersion }` |
-| Repositorio | `jh-platform-lab/${ values.name }` |
+| Versión de la plantilla | `${{ values.templateVersion }}` |
+| Repositorio | `jh-platform-lab/${{ values.name }}` |
 
 ## Qué incluye este servicio
 

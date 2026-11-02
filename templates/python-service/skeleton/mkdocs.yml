@@ -22,6 +22,7 @@ markdown_extensions:
 nav:
   - Inicio: index.md
   - Arquitectura: arquitectura.md
+  - APIs: api.md
   - Desarrollo y verificación: desarrollo.md
   - Operación y CI/CD: operacion.md
   - Troubleshooting: troubleshooting.md
