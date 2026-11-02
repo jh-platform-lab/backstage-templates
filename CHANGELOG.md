@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.2
+
+- La entidad API del catálogo lleva la anotación `backstage.io/techdocs-ref`, así que la API también muestra su documentación de TechDocs.
+
 ## 1.5.1
 
 - Corrige la tabla de propiedades de la documentación: las variables del formulario se mostraban sin reemplazar.
