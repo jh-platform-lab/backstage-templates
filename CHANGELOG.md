@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (python-service)
+
+- Corrige el comando de Terraform: se quita el `sh` sobrante después de la imagen (el entrypoint ya es `sh`).
+
 ## 1.6.1 (python-service)
 
 - Corrige la ejecución de Terraform en CI y CD: la imagen `hashicorp/terraform` tiene `terraform` como entrypoint, así que los comandos `sh -c` se ejecutan con `--entrypoint sh`.

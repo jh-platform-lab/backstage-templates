@@ -33,7 +33,7 @@ jobs:
           docker run --rm --entrypoint sh -v "$PWD/terraform:/w" -w /w \
             -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
             -e TF_STATE_BUCKET -e SERVICE \
-            hashicorp/terraform:1.12 sh -c '
+            hashicorp/terraform:1.12 -c '
               terraform init -input=false \
                 -backend-config="bucket=$TF_STATE_BUCKET" \
                 -backend-config="key=$SERVICE/terraform.tfstate" \
@@ -64,7 +64,7 @@ jobs:
           docker run --rm --entrypoint sh -v "$PWD/terraform:/w" -w /w \
             -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
             -e TF_STATE_BUCKET -e SERVICE -e IMAGE_URI \
-            hashicorp/terraform:1.12 sh -c '
+            hashicorp/terraform:1.12 -c '
               terraform init -input=false \
                 -backend-config="bucket=$TF_STATE_BUCKET" \
                 -backend-config="key=$SERVICE/terraform.tfstate" \
