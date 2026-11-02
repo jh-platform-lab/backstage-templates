@@ -107,3 +107,21 @@ jobs:
           python-version: "3.12"
       - run: pip install mkdocs==1.6.1 mkdocs-techdocs-core==1.7.1
       - run: mkdocs build --strict -d /tmp/site
+
+  kind:
+    # Verifica los manifiestos de Kubernetes en un cluster Kind dentro del runner. No despliega
+    # nada real: el despliegue a EKS es el siguiente paso (ver docs/operacion.md).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Instalar kind
+        run: |
+          curl -fsSLo kind https://kind.sigs.k8s.io/dl/v0.24.0/kind-linux-amd64
+          chmod +x kind && sudo mv kind /usr/local/bin/kind
+      - name: Desplegar en Kind y probar /health
+        env:
+          KIND_CLUSTER: ci
+        run: bash scripts/kind-deploy.sh
+      - name: Borrar el cluster
+        if: always()
+        run: kind delete cluster --name ci

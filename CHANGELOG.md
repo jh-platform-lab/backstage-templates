@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.3 (python-service)
+
+- CI: job `kind` que despliega los manifiestos en un cluster Kind dentro del runner y prueba `/health`. La documentación aclara que el despliegue real a EKS es el siguiente paso.
+
 ## 1.6.2 (python-service)
 
 - Corrige el comando de Terraform: se quita el `sh` sobrante después de la imagen (el entrypoint ya es `sh`).
