@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- Nuevas plantillas de servicio: `go-service` (net/http, imagen distroless) y `java-service` (Spring Boot 3.5, Java 21). Lambda usa AWS Lambda Web Adapter.
+- Nuevas plantillas de infraestructura: `s3-bucket` (KMS, versionado, TLS, expiración) y `sqs-queue` (DLQ, redrive, KMS, TLS). Terraform con CI (fmt, validate, checkov) y CD con OIDC.
+- Plantillas de gestión sobre servicios existentes: `update-service` (archivos de plataforma), `add-observability` (New Relic) y `team-registration` (Group en `catalog/teams/`). Abren un pull request; no crean repositorios.
+- `python-service` y `nodejs-service` pasan a la versión 1.3.0 de la plantilla (sin cambios en el contenido generado).
+
 ## 1.2.0
 
 - Una card por plantilla: `python-service` (FastAPI) y `nodejs-service` (Express), cada una en su carpeta autocontenida (`template.yaml` + `skeleton/`). Desaparece el campo `language` del formulario.

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Terraform fmt, init and validate
+        run: |
+          TF="docker run --rm -v $PWD/terraform:/w -w /w hashicorp/terraform:1.12"
+          $TF fmt -check -diff
+          $TF init -backend=false -input=false
+          $TF validate
+      - name: Checkov
+        run: docker run --rm -v "$PWD/terraform:/tf" bridgecrew/checkov:3.4.0 -d /tf --framework terraform --compact
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --no-banner

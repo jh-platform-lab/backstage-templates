@@ -8,6 +8,13 @@ Plantillas de autoservicio de Backstage para el reto técnico de Wenia. Cada pla
 |---|---|
 | `python-service` | Microservicio Python (FastAPI), desplegable como AWS Lambda o en Kubernetes |
 | `nodejs-service` | Microservicio Node.js (Express), desplegable como AWS Lambda o en Kubernetes |
+| `go-service` | Microservicio Go (net/http), desplegable como AWS Lambda o en Kubernetes |
+| `java-service` | Microservicio Java 21 (Spring Boot), desplegable como AWS Lambda o en Kubernetes |
+| `s3-bucket` | Infra: bucket S3 privado con KMS, versionado y TLS (Terraform, CI con checkov, CD con OIDC) |
+| `sqs-queue` | Infra: cola SQS con DLQ, KMS y TLS (Terraform, CI con checkov, CD con OIDC) |
+| `update-service` | Gestión: abre un PR en un servicio existente con los archivos de plataforma a la última versión |
+| `add-observability` | Gestión: abre un PR en un servicio existente con alertas y dashboard de New Relic |
+| `team-registration` | Gestión: abre un PR en wenia-platform que registra un equipo en `catalog/teams/` |
 
 ## Estructura
 

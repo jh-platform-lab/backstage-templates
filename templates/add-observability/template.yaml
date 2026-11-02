@@ -1,0 +1,70 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: add-observability
+  title: Anadir observabilidad (New Relic) a un servicio existente
+  description: >-
+    Abre un pull request en un servicio existente con las alertas y el dashboard de New Relic como codigo (Terraform en observability/newrelic).
+  tags:
+    - observability
+    - newrelic
+    - wenia
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: Servicio
+      required:
+        - component
+      properties:
+        component:
+          title: Servicio
+          type: string
+          description: Servicio del catalogo que se va a modificar.
+          ui:field: EntityPicker
+          ui:options:
+            catalogFilter:
+              - kind: Component
+                spec.type: service
+
+  steps:
+    - id: entity
+      name: Leer el servicio del catalogo
+      action: catalog:fetch
+      input:
+        entityRef: ${{ parameters.component }}
+
+    - id: fetch
+      name: Generar los archivos actualizados
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutTemplating:
+          - .github/workflows/*
+        values:
+          name: ${{ steps['entity'].output.entity.metadata.name }}
+          description: ${{ steps['entity'].output.entity.metadata.description }}
+          owner: ${{ steps['entity'].output.entity.spec.owner | replace('group:default/', '') }}
+          language: ${{ steps['entity'].output.entity.metadata.tags[0] }}
+          serviceType: ${{ steps['entity'].output.entity.metadata.tags[1] }}
+          templateVersion: 1.3.0
+
+    - id: pr
+      name: Abrir el pull request en el servicio
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=jh-platform-lab&repo=${{ steps['entity'].output.entity.metadata.name }}
+        branchName: feat/newrelic-observability
+        title: "feat: add New Relic alerts and dashboard as code"
+        description: |
+          Anade `observability/newrelic/` con las alertas (latencia y errores) y el dashboard del servicio como Terraform.
+
+          Para aplicarlo: `export TF_VAR_api_key=NRAK-...` y `terraform apply -var account_id=<id>` dentro de `observability/newrelic/`.
+          Las alertas solo reciben datos si el servicio tiene el agente APM de New Relic.
+        update: true
+
+  output:
+    links:
+      - title: Pull request
+        url: ${{ steps['pr'].output.remoteUrl }}

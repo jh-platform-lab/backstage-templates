@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ${{ values.name }}
+  description: ${{ values.description | dump }}
+spec:
+  type: team
+  displayName: ${{ values.displayName | dump }}
+{%- if values.email %}
+  profile:
+    email: ${{ values.email | dump }}
+{%- endif %}
+  children: []

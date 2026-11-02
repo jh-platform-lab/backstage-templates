@@ -1,0 +1,15 @@
+# Imagen para AWS Lambda (Function URL). Para Kubernetes ver Dockerfile.
+# Go no trae adaptador propio: se usa AWS Lambda Web Adapter, que traduce los eventos de Lambda
+# a peticiones HTTP hacia el mismo servidor (puerto 8000). La arquitectura de la imagen debe
+# coincidir con la de la funcion (arm64 o x86_64).
+FROM golang:1.24 AS build
+WORKDIR /src
+COPY go.mod ./
+COPY *.go ./
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/server .
+
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=build /out/server /server
+ENV AWS_LWA_PORT=8000 AWS_LWA_READINESS_CHECK_PATH=/health
+ENTRYPOINT ["/server"]
