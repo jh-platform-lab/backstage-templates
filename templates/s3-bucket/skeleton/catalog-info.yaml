@@ -5,6 +5,7 @@ metadata:
   description: ${{ values.description | dump }}
   annotations:
     github.com/project-slug: jh-platform-lab/${{ values.name }}
+    backstage.io/techdocs-ref: dir:.
     wenia.io/template-version: ${{ values.templateVersion | dump }}
   tags:
     - infrastructure

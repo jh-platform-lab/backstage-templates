@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+
+- Documentación TechDocs en cada servicio y plantilla de infraestructura: `mkdocs.yml` (usa el README como página) y la anotación `backstage.io/techdocs-ref` en `catalog-info.yaml`. Los servicios ya creados no la reciben; se añade con `update-service`.
+
 ## 1.3.0
 
 - Nuevas plantillas de servicio: `go-service` (net/http, imagen distroless) y `java-service` (Spring Boot 3.5, Java 21). Lambda usa AWS Lambda Web Adapter.
