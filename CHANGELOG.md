@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.6 (python-service)
+
+- Terraform: el repositorio ECR trae una política que permite a Lambda leer la imagen (`BatchGetImage`, `GetDownloadUrlForLayer`), acotada a la función del servicio. Sin ella `CreateFunction` falla con "Lambda does not have permission to access the ECR image".
+
 ## 1.6.5 (python-service)
 
 - CD: `docker build --provenance=false --sbom=false`. Con las atestaciones por defecto la imagen se publica como índice de manifiestos y Lambda la rechaza ("image manifest, config or layer media type ... is not supported").
