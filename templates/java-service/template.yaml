@@ -113,7 +113,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: java
           apis: ${{ parameters.apis }}
-          templateVersion: 1.5.3
+          templateVersion: 1.5.4
 
     - id: publish
       name: Crear el repositorio en GitHub
