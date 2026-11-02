@@ -23,7 +23,7 @@ metadata:
   name: ${{ values.name }}-api
   description: API de ${{ values.name }}
   annotations:
-    backstage.io/techdocs-ref: dir:.
+    backstage.io/techdocs-ref: dir:./api-docs
 spec:
   type: openapi
   lifecycle: experimental

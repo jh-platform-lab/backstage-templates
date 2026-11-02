@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.4
+
+- La entidad API tiene su propio sitio de TechDocs (`api-docs/`): muestra solo la referencia de la API (rutas, ejemplos y contrato), no la documentación del servicio.
+
 ## 1.5.3
 
 - Los diagramas de arquitectura de TechDocs ahora son imágenes SVG (antes eran bloques Mermaid que Backstage mostraba como código). Se elige el diagrama según el tipo de servicio: Lambda o Kubernetes.

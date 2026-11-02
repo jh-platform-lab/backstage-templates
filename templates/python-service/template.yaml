@@ -122,7 +122,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: python
           apis: ${{ parameters.apis }}
-          templateVersion: 1.5.3
+          templateVersion: 1.5.4
 
     # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
     - id: publish
