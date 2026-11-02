@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (python-service)
+
+- Corrige la ejecución de Terraform en CI y CD: la imagen `hashicorp/terraform` tiene `terraform` como entrypoint, así que los comandos `sh -c` se ejecutan con `--entrypoint sh`.
+
 ## 1.6.0 (python-service)
 
 - Terraform con módulos locales (`modules/ecr-repo`, `modules/github-cd-role`, `modules/lambda-service`) y backend remoto S3 con bloqueo por archivo.
