@@ -1,0 +1,74 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: team-registration
+  title: Alta de equipo en el catalogo
+  description: >-
+    Abre un pull request en wenia-platform que registra un equipo (Group) en el catalogo de Backstage.
+  tags:
+    - catalog
+    - team
+    - wenia
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: Datos del equipo
+      required:
+        - name
+        - displayName
+        - description
+      properties:
+        name:
+          title: Identificador del equipo
+          type: string
+          description: Formato DNS en minusculas, termina en -team. Ejemplo, data-team
+          pattern: '^[a-z][a-z0-9-]{1,30}-team$'
+          maxLength: 40
+          ui:autofocus: true
+        displayName:
+          title: Nombre visible
+          type: string
+          minLength: 3
+          maxLength: 60
+        description:
+          title: Descripcion
+          type: string
+          minLength: 10
+          maxLength: 200
+        email:
+          title: Correo del equipo (opcional)
+          type: string
+          format: email
+
+  steps:
+    - id: fetch
+      name: Generar la definicion del equipo
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          displayName: ${{ parameters.displayName }}
+          description: ${{ parameters.description }}
+          email: ${{ parameters.email }}
+
+    - id: pr
+      name: Abrir el pull request en wenia-platform
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=jh-platform-lab&repo=wenia-platform
+        branchName: team/${{ parameters.name }}
+        title: "feat(catalog): add team ${{ parameters.name }}"
+        description: |
+          Registra el equipo `${{ parameters.name }}` en el catalogo (carpeta `catalog/teams/`).
+
+          Para que pueda ser propietario en los formularios, agregalo tambien a la lista de equipos de cada plantilla.
+        targetPath: catalog/teams
+        update: true
+
+  output:
+    links:
+      - title: Pull request
+        url: ${{ steps['pr'].output.remoteUrl }}

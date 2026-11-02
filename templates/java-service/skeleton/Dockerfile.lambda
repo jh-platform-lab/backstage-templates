@@ -1,0 +1,16 @@
+# Imagen para AWS Lambda (Function URL). Para Kubernetes ver Dockerfile.
+# Se usa AWS Lambda Web Adapter: traduce los eventos de Lambda a peticiones HTTP hacia el mismo
+# servidor Spring (puerto 8000). La JVM tiene arranque en frio de varios segundos: para latencia
+# baja considera SnapStart o una imagen nativa. La arquitectura debe coincidir con la de la funcion.
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /src
+COPY pom.xml ./
+RUN mvn -q -B dependency:go-offline
+COPY src ./src
+RUN mvn -q -B -DskipTests package
+
+FROM eclipse-temurin:21-jre
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=build /src/target/app.jar /srv/app.jar
+ENV AWS_LWA_PORT=8000 AWS_LWA_READINESS_CHECK_PATH=/health
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-jar", "/srv/app.jar"]

@@ -1,0 +1,114 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: sqs-queue
+  title: "Infra: cola SQS con DLQ"
+  description: >-
+    Crea un repositorio con el Terraform de una cola SQS y su DLQ (cifrado KMS, redrive), CI con checkov y CD con OIDC.
+  tags:
+    - infrastructure
+    - terraform
+    - sqs
+    - wenia
+spec:
+  owner: group:default/platform-team
+  type: resource
+
+  parameters:
+    - title: Datos de la cola
+      required:
+        - name
+        - description
+        - owner
+      properties:
+        name:
+          title: Nombre
+          type: string
+          description: Formato DNS, en minusculas, de 3 a 40 caracteres.
+          pattern: '^[a-z][a-z0-9-]{1,38}[a-z0-9]$'
+          maxLength: 40
+          ui:autofocus: true
+        description:
+          title: Descripcion
+          type: string
+          minLength: 10
+          maxLength: 200
+        owner:
+          title: Equipo propietario
+          type: string
+          description: Lista cerrada de equipos.
+          enum:
+            - platform-team
+            - payments-team
+            - growth-team
+        visibilityTimeout:
+          title: Visibilidad del mensaje (segundos)
+          type: integer
+          minimum: 0
+          maximum: 43200
+          default: 30
+        maxReceiveCount:
+          title: Intentos antes de ir a la DLQ
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 5
+        retentionDays:
+          title: Dias de retencion
+          type: integer
+          minimum: 1
+          maximum: 14
+          default: 4
+
+  steps:
+    # 1. Duplicados: consulta el catalogo y GitHub; si el nombre existe, la tarea falla aqui.
+    - id: check-duplicate
+      name: Verificar que el nombre no exista
+      action: wenia:check-duplicate
+      input:
+        name: ${{ parameters.name }}
+        org: jh-platform-lab
+
+    - id: fetch
+      name: Generar los archivos
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutTemplating:
+          - .github/workflows/*
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          visibilityTimeout: ${{ parameters.visibilityTimeout }}
+          maxReceiveCount: ${{ parameters.maxReceiveCount }}
+          retentionDays: ${{ parameters.retentionDays }}
+          templateVersion: 1.3.0
+
+    - id: publish
+      name: Crear el repositorio en GitHub
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=jh-platform-lab&repo=${{ parameters.name }}
+        description: ${{ parameters.description }}
+        defaultBranch: main
+        repoVisibility: public
+        protectDefaultBranch: false
+
+    # Registra el Component en el catalogo; si falla, la accion borra el repo creado por esta tarea.
+    - id: register
+      name: Registrar en el catalogo
+      action: wenia:register-or-rollback
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: /catalog-info.yaml
+        org: jh-platform-lab
+        name: ${{ parameters.name }}
+
+  output:
+    links:
+      - title: Repositorio
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Abrir en el catalogo
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}

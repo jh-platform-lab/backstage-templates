@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: ${{ values.name }}
+  description: ${{ values.description | dump }}
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      operationId: health
+      summary: Liveness check
+      responses:
+        "200":
+          description: Service is up
+{%- for path, ops in values.apis | groupby('path') %}
+  ${{ path }}:
+{%- if '{' in path %}
+    parameters:
+{%- for seg in path.split('/') %}
+{%- if seg.startsWith('{') %}
+      - name: ${{ seg | replace('{', '') | replace('}', '') }}
+        in: path
+        required: true
+        schema:
+          type: string
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- for api in ops %}
+    ${{ api.method | lower }}:
+      operationId: ${{ api.name }}
+      summary: ${{ api.name }}
+      responses:
+        "200":
+          description: OK
+{%- endfor %}
+{%- endfor %}
