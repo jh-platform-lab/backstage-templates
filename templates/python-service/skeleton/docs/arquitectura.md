@@ -4,28 +4,21 @@ Cómo corre el servicio y cómo llega a producción.
 
 ## Ejecución
 
-```mermaid
-flowchart LR
-  C[Cliente] -->|HTTPS| T{Tipo de servicio}
-  T -->|lambda| FU[Function URL] --> L[Lambda<br/>imagen de ECR]
-  T -->|k8s| S[Service] --> P[Pods EKS<br/>2 réplicas]
-  L --> O[(CloudWatch)]
-  P --> NR[(New Relic APM)]
-  classDef store fill:#eef,stroke:#669;
-```
+{% if values.serviceType == 'lambda' %}
+![Ejecución en Lambda](img/runtime-lambda.svg)
+{% else %}
+![Ejecución en Kubernetes](img/runtime-k8s.svg)
+{% endif %}
 
 La imagen se construye una vez y se usa en los dos tipos de despliegue. El tipo lo decide el campo `serviceType` del formulario (`${{ values.serviceType }}` en este servicio).
 
 ## Entrega
 
-```mermaid
-flowchart LR
-  D[Desarrollador] -->|pull request| CI[CI<br/>pruebas · seguridad · Terraform · imagen]
-  CI -->|merge a main| CD[CD<br/>entorno production · OIDC]
-  CD -->|push| E[(ECR)]
-  E -->|lambda| L[update-function-code]
-  E -->|k8s| K[Despliegue en EKS<br/>marcador pendiente]
-```
+{% if values.serviceType == 'lambda' %}
+![Entrega en Lambda](img/delivery-lambda.svg)
+{% else %}
+![Entrega en Kubernetes](img/delivery-k8s.svg)
+{% endif %}
 
 !!! note "Estado del despliegue a Kubernetes"
     El CD publica la imagen en ECR. El paso de despliegue en EKS es un marcador hasta que exista el cluster.

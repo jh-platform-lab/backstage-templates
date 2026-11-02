@@ -114,6 +114,7 @@ spec:
         url: ./skeleton
         copyWithoutTemplating:
           - .github/workflows/*
+          - docs/img/*
           - package-lock.json
         values:
           name: ${{ parameters.name }}
@@ -122,7 +123,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: nodejs
           apis: ${{ parameters.apis }}
-          templateVersion: 1.5.2
+          templateVersion: 1.5.3
 
     # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
     - id: publish
