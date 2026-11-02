@@ -12,11 +12,6 @@ RUN npm ci --omit=dev
 COPY src ./src
 COPY newrelic.js ./
 
-# En ejecucion no se usan npm ni yarn: se quitan de la imagen para no cargar sus dependencias
-# (undici, brace-expansion) con vulnerabilidades que el CI detecta con Trivy.
-RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx \
-    /opt/yarn-* /usr/local/bin/yarn /usr/local/bin/yarnpkg
-
 # Usuario sin privilegios con uid numerico para que Kubernetes pueda verificar runAsNonRoot.
 USER 10001:10001
 
