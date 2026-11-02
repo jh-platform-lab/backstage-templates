@@ -52,7 +52,7 @@ jobs:
           FILE=Dockerfile
           if [ "${{ steps.kind.outputs.type }}" = "lambda" ]; then FILE=Dockerfile.lambda; fi
           IMAGE="$REGISTRY/$SERVICE:${{ github.sha }}"
-          docker build -f "$FILE" -t "$IMAGE" .
+          docker build --provenance=false --sbom=false -f "$FILE" -t "$IMAGE" .
           docker push "$IMAGE"
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
