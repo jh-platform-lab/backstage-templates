@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.3
+
+- Los diagramas de arquitectura de TechDocs ahora son imágenes SVG (antes eran bloques Mermaid que Backstage mostraba como código). Se elige el diagrama según el tipo de servicio: Lambda o Kubernetes.
+
 ## 1.5.2
 
 - La entidad API del catálogo lleva la anotación `backstage.io/techdocs-ref`, así que la API también muestra su documentación de TechDocs.

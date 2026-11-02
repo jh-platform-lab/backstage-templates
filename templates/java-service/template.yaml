@@ -105,6 +105,7 @@ spec:
         url: ./skeleton
         copyWithoutTemplating:
           - .github/workflows/*
+          - docs/img/*
         values:
           name: ${{ parameters.name }}
           description: ${{ parameters.description }}
@@ -112,7 +113,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: java
           apis: ${{ parameters.apis }}
-          templateVersion: 1.5.2
+          templateVersion: 1.5.3
 
     - id: publish
       name: Crear el repositorio en GitHub
