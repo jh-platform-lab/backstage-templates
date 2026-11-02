@@ -4,31 +4,25 @@ ${{ values.description }}
 
 | | |
 |---|---|
-| Equipo propietario | `${{ values.owner }}` |
-| Tipo de servicio | `${{ values.serviceType }}` |
-| Versión de la plantilla | `${{ values.templateVersion }}` |
+| Propietario | `${ values.owner }` |
+| Tipo de servicio | `${ values.serviceType }` |
+| Lenguaje | Python 3.12 (FastAPI) |
+| Versión de la plantilla | `${ values.templateVersion }` |
+| Repositorio | `jh-platform-lab/${ values.name }` |
+
+## Qué incluye este servicio
+
+- Una API con `/health` y las rutas del formulario (FastAPI).
+- Dockerfile para Kubernetes y Dockerfile para Lambda.
+- CI en cada pull request y CD al fusionar en `main`.
+- Terraform para el repositorio ECR, el rol de despliegue (OIDC) y, en Lambda, la función.
+- Alertas y dashboard de New Relic como código.
 
 ## Rutas de la API
 
-| Método | Ruta | Operación |
-|---|---|---|
-| GET | `/health` | `health` |
+| Método | Ruta | Operación | Estado |
+|---|---|---|---|
+| GET | `/health` | `health` | Implementada |
 {%- for api in values.apis %}
-| ${{ api.method }} | `${{ api.path }}` | `${{ api.name }}` |
+| ${{ api.method }} | `${{ api.path }}` | `${{ api.name }}` | 501 hasta implementar |
 {%- endfor %}
-
-Cada ruta responde `501 Not implemented` hasta que se escriba su lógica. El contrato completo está en `openapi.yaml`.
-
-## Cómo trabajar con el servicio
-
-| Qué | Dónde |
-|---|---|
-| Desarrollar y ejecutar en local | README del repositorio, sección "Desarrollar" |
-| Verificar (pruebas, seguridad, imagen) | README del repositorio, sección "Verificar" |
-| Desplegar y operar | README del repositorio, secciones "Operar" y "Troubleshooting" |
-| Integración continua | `.github/workflows/ci.yml`: valida y no publica |
-| Despliegue continuo | `.github/workflows/cd.yml`: publica la imagen y actualiza el despliegue solo en `main` |
-
-## Observabilidad
-
-Las alertas y el dashboard de New Relic están en `observability/newrelic/`. El servicio emite su estado en `/health`.

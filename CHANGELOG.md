@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+
+- Documentación TechDocs completa en los servicios Python, Node.js, Go y Java: arquitectura con diagramas Mermaid, desarrollo y verificación, operación y CI/CD, troubleshooting, observabilidad y evolución de la plantilla.
+- Los servicios ya creados no reciben estas páginas; se añaden con `update-service` (pendiente de extender a esa plantilla).
+
 ## 1.4.0
 
 - Documentación TechDocs en cada servicio y plantilla de infraestructura: `mkdocs.yml` (usa el README como página) y la anotación `backstage.io/techdocs-ref` en `catalog-info.yaml`. Los servicios ya creados no la reciben; se añade con `update-service`.
