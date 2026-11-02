@@ -1,5 +1,7 @@
 name: CD
 
+# Solo en main. Entorno production (aprobacion manual). Orden: Terraform crea ECR y el rol,
+# luego se publica la imagen, luego Terraform crea la Lambda con esa imagen.
 on:
   push:
     branches: [main]
@@ -12,28 +14,70 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    env:
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      SERVICE: ${{ github.event.repository.name }}
     steps:
       - uses: actions/checkout@v7
+
       - id: kind
         run: echo "type=$(cat deploy/service-type)" >> "$GITHUB_OUTPUT"
+
       - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: us-east-1
+
+      - name: Terraform apply (ECR y rol de CD)
+        run: |
+          docker run --rm -v "$PWD/terraform:/w" -w /w \
+            -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
+            -e TF_STATE_BUCKET -e SERVICE \
+            hashicorp/terraform:1.12 sh -c '
+              terraform init -input=false \
+                -backend-config="bucket=$TF_STATE_BUCKET" \
+                -backend-config="key=$SERVICE/terraform.tfstate" \
+                -backend-config="region=us-east-1" \
+                -backend-config="use_lockfile=true" &&
+              terraform apply -input=false -auto-approve'
+
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v2
+
       - name: Build and push
+        id: build
         env:
-          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ github.event.repository.name }}:${{ github.sha }}
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           FILE=Dockerfile
           if [ "${{ steps.kind.outputs.type }}" = "lambda" ]; then FILE=Dockerfile.lambda; fi
+          IMAGE="$REGISTRY/$SERVICE:${{ github.sha }}"
           docker build -f "$FILE" -t "$IMAGE" .
           docker push "$IMAGE"
-          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
-      - name: Deploy Lambda
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Terraform apply (Lambda con la imagen nueva)
         if: steps.kind.outputs.type == 'lambda'
-        run: aws lambda update-function-code --function-name "${{ github.event.repository.name }}" --image-uri "$IMAGE"
-      - name: Deploy Kubernetes
+        env:
+          IMAGE_URI: ${{ steps.build.outputs.image }}
+        run: |
+          docker run --rm -v "$PWD/terraform:/w" -w /w \
+            -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
+            -e TF_STATE_BUCKET -e SERVICE -e IMAGE_URI \
+            hashicorp/terraform:1.12 sh -c '
+              terraform init -input=false \
+                -backend-config="bucket=$TF_STATE_BUCKET" \
+                -backend-config="key=$SERVICE/terraform.tfstate" \
+                -backend-config="region=us-east-1" \
+                -backend-config="use_lockfile=true" &&
+              terraform apply -input=false -auto-approve -var "image_uri=$IMAGE_URI"'
+
+      - name: Actualizar codigo de la Lambda
+        if: steps.kind.outputs.type == 'lambda'
+        env:
+          IMAGE: ${{ steps.build.outputs.image }}
+        run: aws lambda update-function-code --function-name "$SERVICE" --image-uri "$IMAGE"
+
+      - name: Desplegar en Kubernetes
         if: steps.kind.outputs.type == 'k8s'
-        run: echo "Pendiente - kubectl set image cuando exista el cluster EKS (se hace en la sesion de AWS)"
+        run: echo "Pendiente - kubectl set image cuando exista el cluster EKS (siguiente paso)."

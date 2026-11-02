@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0 (python-service)
+
+- Terraform con módulos locales (`modules/ecr-repo`, `modules/github-cd-role`, `modules/lambda-service`) y backend remoto S3 con bloqueo por archivo.
+- CI: `terraform plan` de solo lectura en cada PR (rol de plan por OIDC), actionlint y build estricto de TechDocs.
+- CD en `main` con entorno `production`: `terraform apply` de ECR y rol, publicación de la imagen con su SHA, creación de la Lambda con esa imagen y actualización de código.
+- Pendiente: replicar este flujo en nodejs-service, go-service y java-service.
+
 ## 1.5.4
 
 - La entidad API tiene su propio sitio de TechDocs (`api-docs/`): muestra solo la referencia de la API (rutas, ejemplos y contrato), no la documentación del servicio.

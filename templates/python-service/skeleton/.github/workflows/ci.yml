@@ -59,3 +59,51 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+
+  terraform-plan:
+    # Solo en pull requests: el rol de plan es de solo lectura y no puede aplicar nada.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+      SERVICE: ${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Terraform plan (solo lectura)
+        run: |
+          docker run --rm -v "$PWD/terraform:/w" -w /w \
+            -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
+            -e TF_STATE_BUCKET -e SERVICE \
+            hashicorp/terraform:1.12 sh -c '
+              terraform init -input=false \
+                -backend-config="bucket=$TF_STATE_BUCKET" \
+                -backend-config="key=$SERVICE/terraform.tfstate" \
+                -backend-config="region=us-east-1" \
+                -backend-config="use_lockfile=true" &&
+              terraform plan -input=false -no-color'
+
+  workflows:
+    # Valida la sintaxis y las expresiones de los propios workflows (CI y CD).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: actionlint
+        run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.7 -color
+
+  docs:
+    # La documentacion de TechDocs debe compilar sin advertencias.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install mkdocs==1.6.1 mkdocs-techdocs-core==1.7.1
+      - run: mkdocs build --strict -d /tmp/site
