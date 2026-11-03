@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (nodejs-service)
+
+- Imagen: se elimina npm/npx de la imagen final. El npm de la imagen base `node:24-slim` empaqueta `undici` y `brace-expansion` con CVE HIGH que hacían fallar el job `image` (Trivy) del CI en servicios nuevos.
+
 ## 1.6.0 (nodejs-service)
 
 - CD alineado con `python-service`: el primer `terraform apply` (`-target=module.ecr -target=module.cd_role`) crea el repositorio ECR y el rol antes de publicar la imagen; la Lambda se crea con la imagen ya publicada. Corrige "The repository ... does not exist" en el primer despliegue.
