@@ -77,7 +77,7 @@ resource "aws_lambda_permission" "url_invoke_url" {
   #checkov:skip=CKV_AWS_301: acceso publico a proposito para la demo (ver aws_lambda_function_url)
   count = local.enabled
 
-  statement_id           = "FunctionURLAllowPublicAccess"
+  statement_id           = "WeniaUrlPublicAccess"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.this[0].function_name
   principal              = "*"
@@ -88,7 +88,7 @@ resource "aws_lambda_permission" "url_invoke_function" {
   #checkov:skip=CKV_AWS_301: acceso publico a proposito para la demo (ver aws_lambda_function_url)
   count = local.enabled
 
-  statement_id             = "FunctionURLAllowInvokeAction"
+  statement_id             = "WeniaUrlInvokeFunction"
   action                   = "lambda:InvokeFunction"
   function_name            = aws_lambda_function.this[0].function_name
   principal                = "*"
