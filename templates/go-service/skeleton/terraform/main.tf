@@ -187,7 +187,7 @@ resource "aws_lambda_permission" "url_invoke_url" {
 
   count = local.deploy_lambda ? 1 : 0
 
-  statement_id           = "FunctionURLAllowPublicAccess"
+  statement_id           = "WeniaUrlPublicAccess"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.this[0].function_name
   principal              = "*"
@@ -199,7 +199,7 @@ resource "aws_lambda_permission" "url_invoke_function" {
 
   count = local.deploy_lambda ? 1 : 0
 
-  statement_id             = "FunctionURLAllowInvokeAction"
+  statement_id             = "WeniaUrlInvokeFunction"
   action                   = "lambda:InvokeFunction"
   function_name            = aws_lambda_function.this[0].function_name
   principal                = "*"

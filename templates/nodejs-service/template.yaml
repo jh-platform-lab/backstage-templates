@@ -123,7 +123,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: nodejs
           apis: ${{ parameters.apis }}
-          templateVersion: 1.6.1
+          templateVersion: 1.6.2
 
     # 3. Publica en la org del reto. El owner esta fijo: no se puede elegir otro destino.
     - id: publish

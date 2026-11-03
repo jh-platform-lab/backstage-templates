@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.7 (python-service), 1.6.2 (nodejs-service), 1.5.5 (go-service, java-service)
+
+- Terraform: los permisos publicos de la Function URL usan identificadores propios (`WeniaUrlPublicAccess`, `WeniaUrlInvokeFunction`). Al crear una URL con auth `NONE`, Lambda agrega por su cuenta dos permisos con los nombres `FunctionURLAllowPublicAccess` y `FunctionURLAllowInvokeAction`; si Terraform pedia los mismos nombres a la vez, el que llegaba segundo recibia `409 ResourceConflictException` y el provider reintentaba 5 minutos antes de fallar el primer `apply`. Con nombres distintos no hay carrera. Los servicios ya generados no cambian solos: el fallo solo ocurre en el primer `apply`.
+
 ## 1.6.1 (nodejs-service)
 
 - Imagen: se elimina npm/npx de la imagen final. El npm de la imagen base `node:24-slim` empaqueta `undici` y `brace-expansion` con CVE HIGH que hacían fallar el job `image` (Trivy) del CI en servicios nuevos.

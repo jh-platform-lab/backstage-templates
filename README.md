@@ -30,10 +30,10 @@ flowchart LR
 
 | Plantilla | Genera | Versión |
 |---|---|---|
-| `python-service` | Microservicio Python (FastAPI), Lambda o Kubernetes. **Flujo de AWS completo** | 1.6.6 |
-| `nodejs-service` | Microservicio Node.js (Express), Lambda o Kubernetes | 1.5.4 |
-| `go-service` | Microservicio Go (net/http, imagen distroless) | 1.5.4 |
-| `java-service` | Microservicio Java 21 (Spring Boot 3) | 1.5.4 |
+| `python-service` | Microservicio Python (FastAPI), Lambda o Kubernetes. **Flujo de AWS completo** | 1.6.7 |
+| `nodejs-service` | Microservicio Node.js (Express), Lambda o Kubernetes | 1.6.2 |
+| `go-service` | Microservicio Go (net/http, imagen distroless) | 1.5.5 |
+| `java-service` | Microservicio Java 21 (Spring Boot 3) | 1.5.5 |
 | `s3-bucket` | Bucket S3 privado con KMS, versionado y TLS (Terraform, checkov, CD con OIDC) | 1.4.0 |
 | `sqs-queue` | Cola SQS con DLQ, KMS y TLS (Terraform, checkov, CD con OIDC) | 1.4.0 |
 | `update-service` | PR en un servicio existente con los archivos de plataforma a la última versión | 1.3.0 |

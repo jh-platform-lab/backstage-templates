@@ -99,7 +99,7 @@ New Relic para Lambda requiere la extensión de New Relic, que no se incluye en 
 | CD: `Could not assume role` | Falta `AWS_ROLE_ARN`, o el rol no confía en este repo y entorno | Revisa la variable y que el entorno sea `production`; el rol solo acepta `repo:<org>/${{ values.name }}:environment:production` |
 | CD: falla "Deploy Lambda" la primera vez | La función aún no existe | Haz el paso 4 del primer despliegue |
 | Terraform no crea la Lambda | `image_uri` vacío a propósito | Pasa `-var image_uri=<url ECR>:<sha>` |
-| La URL de la Lambda responde 403 | Faltan los dos permisos públicos de la URL | Reaplica Terraform: `FunctionURLAllowPublicAccess` y `FunctionURLAllowInvokeAction` |
+| La URL de la Lambda responde 403 | Faltan los dos permisos públicos de la URL | Reaplica Terraform: `WeniaUrlPublicAccess` y `WeniaUrlInvokeFunction` |
 | Kind: el pod queda en `ImagePullBackOff` | La imagen `${{ values.name }}:local` no está cargada en el cluster | Vuelve a correr `bash scripts/kind-deploy.sh` (construye y la carga con `kind load`) |
 | El contenedor queda `unhealthy` | `/health` no responde | `docker logs <contenedor>` y revisa el arranque del servidor (Spring Boot) |
 | New Relic no muestra datos | El servicio no incluye el agente APM | Añade el agente de Java al servicio y define `NEW_RELIC_LICENSE_KEY` |
