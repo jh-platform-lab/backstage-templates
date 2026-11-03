@@ -60,7 +60,7 @@ Para implementar una ruta, edita su {% if values.language == 'python' %}función
 | Secretos en el repo | `docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.21.2 detect --source /repo --no-banner` |
 | Imagen (K8S) | `docker build -f Dockerfile -t ${{ values.name }} . && docker run --rm -p 8000:8000 ${{ values.name }}` |
 | Imagen (Lambda) | `docker build -f Dockerfile.lambda -t ${{ values.name }}-lambda .` |
-| Kubernetes (local) | `bash scripts/kind-deploy.sh` crea el cluster Kind `local-dev`, despliega y hace `curl /health`; `--delete` lo borra |
+| Kubernetes (local) | `bash scripts/kind-deploy.sh` crea el cluster Kind `wenia-eks`, despliega y hace `curl /health`; con `--ecr [tag]` usa la imagen publicada por el CD; `--delete` lo borra |
 | Terraform | en `terraform/`: `terraform fmt -check`, `terraform init -backend=false`, `terraform validate` |
 
 El CI ejecuta lo mismo en cada PR: `test`, `terraform`, `secrets` e `image` (con escaneo Trivy de HIGH y CRITICAL).
@@ -81,7 +81,7 @@ Desde entonces cada push a `main` publica una imagen etiquetada con el SHA y, en
 | Tipo | Qué hace el CD hoy |
 |---|---|
 | `lambda` | Publica la imagen en ECR y ejecuta `update-function-code` |
-| `k8s` | Publica la imagen en ECR. En local, `scripts/kind-deploy.sh` despliega `k8s/` en Kind. El paso de despliegue a EKS del CD sigue siendo un marcador hasta que exista el cluster |
+| `k8s` | Publica la imagen en ECR. `scripts/kind-deploy.sh --ecr` despliega `k8s/` en Kind con esa imagen (simula EKS). El despliegue a un EKS real queda como evolución |
 
 ### Observabilidad
 

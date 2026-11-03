@@ -21,7 +21,7 @@ La imagen se construye una vez y se usa en los dos tipos de despliegue. El tipo 
 {% endif %}
 
 !!! note "Estado del despliegue a Kubernetes"
-    El CD publica la imagen en ECR. El paso de despliegue en EKS es un marcador hasta que exista el cluster.
+    El CD publica la imagen en ECR. Sin cluster EKS, el despliegue se simula en Kind con `scripts/kind-deploy.sh --ecr`, que baja esa misma imagen de ECR.
 
 ## Componentes
 
