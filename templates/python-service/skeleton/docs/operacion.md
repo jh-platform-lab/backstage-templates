@@ -29,8 +29,10 @@ El CI nunca toca la nube. Solo el CD usa credenciales, con OIDC y el entorno `pr
 
 | Ambiente | Qué pasa | Dónde se ve |
 |---|---|---|
-| Local | `bash scripts/kind-deploy.sh` despliega en un cluster Kind y prueba `/health` | Tu máquina |
+| Local | `bash scripts/kind-deploy.sh` construye la imagen y despliega en un cluster Kind; `--ecr` usa la imagen que publicó el CD | Tu máquina |
 | CI (cada PR y `main`) | El job `kind` hace lo mismo dentro del runner, con un cluster temporal | Pestaña Actions |
-| CD | Crea ECR y publica la imagen; el despliegue a EKS es un marcador | Pestaña Actions |
+| CD | Crea ECR, publica la imagen y deja en el resumen del run el comando para desplegarla en Kind | Pestaña Actions |
 
-**Siguiente paso:** crear un cluster EKS, añadir al CD el `kubectl set image` con el SHA de la imagen y el entorno `production`. Un cluster en la nube no es accesible desde un Kind local, por eso el CD no despliega en Kind.
+**Kind simula EKS:** el cluster `wenia-eks` baja la imagen de ECR con `bash scripts/kind-deploy.sh --ecr` (requiere `aws sso login`). Un runner de GitHub no alcanza el Docker de tu máquina, por eso el CD no despliega en Kind.
+
+**Siguiente paso (evolución):** crear un cluster EKS y añadir al CD el `kubectl set image` con el SHA de la imagen y el entorno `production`.

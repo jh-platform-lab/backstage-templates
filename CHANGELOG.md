@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0 (python-service), 1.6.3 (nodejs-service)
+
+- Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja de ECR la imagen publicada por el CD y la despliega en un cluster Kind (`wenia-eks`), simulando EKS. El CD deja el comando en el resumen del run. El cluster por defecto pasa de `local-dev` a `wenia-eks`.
+
 ## 1.6.7 (python-service), 1.6.2 (nodejs-service), 1.5.5 (go-service, java-service)
 
 - Terraform: los permisos publicos de la Function URL usan identificadores propios (`WeniaUrlPublicAccess`, `WeniaUrlInvokeFunction`). Al crear una URL con auth `NONE`, Lambda agrega por su cuenta dos permisos con los nombres `FunctionURLAllowPublicAccess` y `FunctionURLAllowInvokeAction`; si Terraform pedia los mismos nombres a la vez, el que llegaba segundo recibia `409 ResourceConflictException` y el provider reintentaba 5 minutos antes de fallar el primer `apply`. Con nombres distintos no hay carrera. Los servicios ya generados no cambian solos: el fallo solo ocurre en el primer `apply`.
@@ -13,6 +17,7 @@
 - CD alineado con `python-service`: el primer `terraform apply` (`-target=module.ecr -target=module.cd_role`) crea el repositorio ECR y el rol antes de publicar la imagen; la Lambda se crea con la imagen ya publicada. Corrige "The repository ... does not exist" en el primer despliegue.
 - Terraform con módulos locales (`ecr-repo`, `github-cd-role`, `lambda-service`) y estado remoto en S3 por servicio.
 - `docker build --provenance=false --sbom=false` para que Lambda acepte la imagen.
+- Kubernetes: mismo despliegue simulado en Kind con `scripts/kind-deploy.sh --ecr`.
 
 ## 1.6.6 (python-service)
 

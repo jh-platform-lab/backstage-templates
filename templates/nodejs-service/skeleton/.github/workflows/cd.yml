@@ -78,6 +78,18 @@ jobs:
           IMAGE: ${{ steps.build.outputs.image }}
         run: aws lambda update-function-code --function-name "$SERVICE" --image-uri "$IMAGE"
 
-      - name: Desplegar en Kubernetes
+      - name: Desplegar en Kubernetes (Kind local, simula EKS)
         if: steps.kind.outputs.type == 'k8s'
-        run: echo "Pendiente - kubectl set image cuando exista el cluster EKS (siguiente paso)."
+        env:
+          IMAGE: ${{ steps.build.outputs.image }}
+        run: |
+          {
+            echo "### Imagen publicada en ECR"
+            echo "\`$IMAGE\`"
+            echo
+            echo "Sin cluster EKS, el despliegue se simula en Kind desde tu maquina:"
+            echo "\`\`\`"
+            echo "aws sso login --profile wenia-reto"
+            echo "bash scripts/kind-deploy.sh --ecr ${{ github.sha }}"
+            echo "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"
