@@ -7,7 +7,10 @@ WORKDIR /srv
 
 # Las dependencias van antes que el codigo para reutilizar la capa en cada build.
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# npm y npx no hacen falta al ejecutar: se quitan junto con sus dependencias empaquetadas, que
+# suelen traer CVE de la imagen base (undici, brace-expansion) y agrandan la superficie de ataque.
+RUN npm ci --omit=dev && npm cache clean --force \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 COPY src ./src
 COPY newrelic.js ./
