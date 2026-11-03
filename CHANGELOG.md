@@ -1,10 +1,15 @@
 # Changelog
 
+## 1.7.0 (python-service)
+
+- Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja de ECR la imagen publicada por el CD y la despliega en un cluster Kind (`wenia-eks`), simulando EKS. El CD deja el comando en el resumen del run. El cluster por defecto pasa de `local-dev` a `wenia-eks`.
+
 ## 1.6.0 (nodejs-service)
 
 - CD alineado con `python-service`: el primer `terraform apply` (`-target=module.ecr -target=module.cd_role`) crea el repositorio ECR y el rol antes de publicar la imagen; la Lambda se crea con la imagen ya publicada. Corrige "The repository ... does not exist" en el primer despliegue.
 - Terraform con módulos locales (`ecr-repo`, `github-cd-role`, `lambda-service`) y estado remoto en S3 por servicio.
 - `docker build --provenance=false --sbom=false` para que Lambda acepte la imagen.
+- Kubernetes: mismo despliegue simulado en Kind con `scripts/kind-deploy.sh --ecr`.
 
 ## 1.6.6 (python-service)
 
