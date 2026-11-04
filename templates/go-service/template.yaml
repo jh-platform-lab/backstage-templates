@@ -112,7 +112,7 @@ spec:
           serviceType: ${{ parameters.serviceType }}
           language: go
           apis: ${{ parameters.apis }}
-          templateVersion: 1.6.1
+          templateVersion: 1.6.2
 
     - id: publish
       name: Crear el repositorio en GitHub

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (go-service)
+
+- Lambda: la imagen final de `Dockerfile.lambda` pasa de `distroless/static` a `amazonlinux:2023-minimal`. Con distroless la funcion fallaba al iniciar (`Runtime.InvalidEntrypoint`, 502 en la Function URL). Verificado en AWS: `/health` responde 200.
+
 ## 1.6.1 (go-service, java-service)
 
 - go-service: Go 1.24 -> 1.26 (go.mod y Dockerfiles). `govulncheck` del CI marcaba 20 CVE de la libreria estandar de 1.24.
