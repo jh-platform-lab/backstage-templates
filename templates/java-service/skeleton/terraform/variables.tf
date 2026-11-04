@@ -42,15 +42,15 @@ variable "image_uri" {
 }
 
 variable "memory_size" {
-  description = "Memoria de la Lambda en MB."
+  description = "Memoria de la Lambda en MB (la JVM necesita mas que Python)."
   type        = number
-  default     = 256
+  default     = 1024
 }
 
 variable "timeout" {
-  description = "Tiempo maximo de la Lambda en segundos."
+  description = "Tiempo maximo de la Lambda en segundos (cubre el arranque en frio de la JVM)."
   type        = number
-  default     = 10
+  default     = 30
 }
 
 variable "log_retention_days" {
