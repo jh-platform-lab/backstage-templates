@@ -1,14 +1,18 @@
 output "ecr_repository_url" {
   description = "Repositorio donde el CD publica la imagen."
-  value       = aws_ecr_repository.this.repository_url
+  value       = module.ecr.repository_url
 }
 
 output "cd_role_arn" {
-  description = "Rol que asume el workflow de CD (variable AWS_ROLE_ARN del repo)."
-  value       = aws_iam_role.cd.arn
+  description = "Rol que asume el CD (variable AWS_ROLE_ARN del repo)."
+  value       = module.cd_role.role_arn
+}
+
+output "function_name" {
+  value = module.lambda.function_name
 }
 
 output "function_url" {
   description = "URL publica de la Lambda (vacio hasta que exista la funcion)."
-  value       = try(aws_lambda_function_url.this[0].function_url, null)
+  value       = module.lambda.function_url
 }
