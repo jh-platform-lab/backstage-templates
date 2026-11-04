@@ -41,6 +41,7 @@ spec:
             - platform-team
             - payments-team
             - growth-team
+            - data-team
         serviceType:
           title: Tipo de servicio
           type: string
