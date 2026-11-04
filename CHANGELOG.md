@@ -4,6 +4,12 @@
 
 - CD: `hashicorp/terraform:1.12` ya no trae `sh` como entrypoint, asi que `docker run ... sh -c` fallaba con `Terraform has no command named "sh"`. Ahora usa `--entrypoint sh`, igual que `python-service` y `nodejs-service`. Verificado aplicando y destruyendo ambos skeletons renderizados en AWS.
 
+## 1.6.0 (go-service)
+
+- CD alineado con `python-service`: Terraform con modulos locales (`ecr-repo`, `github-cd-role`, `lambda-service`) y estado remoto en S3 por servicio; el primer `apply` (`-target=module.ecr -target=module.cd_role`) crea ECR y el rol antes de publicar la imagen; la Lambda se crea con la imagen ya publicada.
+- `docker build --provenance=false --sbom=false` para que Lambda acepte la imagen.
+- Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja la imagen de ECR y la despliega en Kind (`wenia-eks`); el CD deja el comando en el resumen del run.
+
 ## 1.7.0 (python-service), 1.6.3 (nodejs-service)
 
 - Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja de ECR la imagen publicada por el CD y la despliega en un cluster Kind (`wenia-eks`), simulando EKS. El CD deja el comando en el resumen del run. El cluster por defecto pasa de `local-dev` a `wenia-eks`.
