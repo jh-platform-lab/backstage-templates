@@ -6,7 +6,7 @@ ${{ values.description }}
 |---|---|
 | Equipo propietario | `${{ values.owner }}` |
 | Tipo de servicio | `${{ values.serviceType }}` |
-| Lenguaje | Go 1.24 (net/http) |
+| Lenguaje | Go 1.26 (net/http) |
 | Versión de la plantilla | `${{ values.templateVersion }}` (anotación `wenia.io/template-version` del catálogo) |
 
 ## Qué se creó
