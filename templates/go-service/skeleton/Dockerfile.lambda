@@ -2,7 +2,7 @@
 # Go no trae adaptador propio: se usa AWS Lambda Web Adapter, que traduce los eventos de Lambda
 # a peticiones HTTP hacia el mismo servidor (puerto 8000). La arquitectura de la imagen debe
 # coincidir con la de la funcion (arm64 o x86_64).
-FROM golang:1.24 AS build
+FROM golang:1.26 AS build
 WORKDIR /src
 COPY go.mod ./
 COPY *.go ./

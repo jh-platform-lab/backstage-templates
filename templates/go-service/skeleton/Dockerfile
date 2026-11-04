@@ -1,5 +1,5 @@
 # Imagen para Kubernetes (EKS). Para Lambda ver Dockerfile.lambda.
-FROM golang:1.24 AS build
+FROM golang:1.26 AS build
 WORKDIR /src
 COPY go.mod ./
 COPY *.go ./

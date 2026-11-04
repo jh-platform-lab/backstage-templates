@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.6.1 (go-service, java-service)
+
+- go-service: Go 1.24 -> 1.26 (go.mod y Dockerfiles). `govulncheck` del CI marcaba 20 CVE de la libreria estandar de 1.24.
+- java-service: Spring Boot 3.5.6 -> 3.5.16. Trivy del CI marcaba CVE HIGH en Spring Framework y Jackson.
+
 ## s3-bucket, sqs-queue (fix)
 
 - CD: `hashicorp/terraform:1.12` ya no trae `sh` como entrypoint, asi que `docker run ... sh -c` fallaba con `Terraform has no command named "sh"`. Ahora usa `--entrypoint sh`, igual que `python-service` y `nodejs-service`. Verificado aplicando y destruyendo ambos skeletons renderizados en AWS.
