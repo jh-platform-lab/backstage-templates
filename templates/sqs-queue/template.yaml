@@ -41,6 +41,7 @@ spec:
             - platform-team
             - payments-team
             - growth-team
+            - data-team
         visibilityTimeout:
           title: Visibilidad del mensaje (segundos)
           type: integer

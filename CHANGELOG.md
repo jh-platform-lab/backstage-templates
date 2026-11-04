@@ -1,5 +1,9 @@
 # Changelog
 
+## data-team en el formulario (python, nodejs, go, java, s3-bucket, sqs-queue)
+
+- La lista cerrada de equipos del formulario incluye `data-team`, el equipo registrado con `team-registration`. Limite conocido: la lista sigue duplicada en cada `template.yaml`; la mejora es un selector (`OwnerPicker`) que lea los equipos del catalogo.
+
 ## 1.6.2 (go-service)
 
 - Lambda: la imagen final de `Dockerfile.lambda` pasa de `distroless/static` a `amazonlinux:2023-minimal`. Con distroless la funcion fallaba al iniciar (`Runtime.InvalidEntrypoint`, 502 en la Function URL). Verificado en AWS: `/health` responde 200.

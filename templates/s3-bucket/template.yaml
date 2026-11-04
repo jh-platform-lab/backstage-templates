@@ -41,6 +41,7 @@ spec:
             - platform-team
             - payments-team
             - growth-team
+            - data-team
         retentionDays:
           title: Dias de retencion de versiones antiguas
           type: integer
