@@ -10,6 +10,12 @@
 - `docker build --provenance=false --sbom=false` para que Lambda acepte la imagen.
 - Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja la imagen de ECR y la despliega en Kind (`wenia-eks`); el CD deja el comando en el resumen del run.
 
+## 1.6.0 (java-service)
+
+- CD alineado con `python-service`: Terraform con modulos locales y estado remoto en S3 por servicio; el primer `apply` crea ECR y el rol antes de publicar la imagen; la Lambda se crea con la imagen ya publicada. `--provenance=false --sbom=false` en el build.
+- Lambda: memoria 1024 MB y timeout 30 s por defecto (la JVM arranca lento en frio con 256 MB y 10 s).
+- Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja la imagen de ECR y la despliega en Kind (`wenia-eks`).
+
 ## 1.7.0 (python-service), 1.6.3 (nodejs-service)
 
 - Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja de ECR la imagen publicada por el CD y la despliega en un cluster Kind (`wenia-eks`), simulando EKS. El CD deja el comando en el resumen del run. El cluster por defecto pasa de `local-dev` a `wenia-eks`.
