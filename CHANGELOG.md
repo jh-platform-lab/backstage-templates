@@ -1,5 +1,9 @@
 # Changelog
 
+## s3-bucket, sqs-queue (fix)
+
+- CD: `hashicorp/terraform:1.12` ya no trae `sh` como entrypoint, asi que `docker run ... sh -c` fallaba con `Terraform has no command named "sh"`. Ahora usa `--entrypoint sh`, igual que `python-service` y `nodejs-service`. Verificado aplicando y destruyendo ambos skeletons renderizados en AWS.
+
 ## 1.7.0 (python-service), 1.6.3 (nodejs-service)
 
 - Kubernetes: `scripts/kind-deploy.sh --ecr [tag]` baja de ECR la imagen publicada por el CD y la despliega en un cluster Kind (`wenia-eks`), simulando EKS. El CD deja el comando en el resumen del run. El cluster por defecto pasa de `local-dev` a `wenia-eks`.

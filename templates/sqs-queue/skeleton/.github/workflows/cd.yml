@@ -21,9 +21,9 @@ jobs:
           aws-region: us-east-1
       - name: Terraform init, plan and apply
         run: |
-          docker run --rm -v "$PWD/terraform:/w" -w /w \
+          docker run --rm --entrypoint sh -v "$PWD/terraform:/w" -w /w \
             -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SESSION_TOKEN -e AWS_REGION=us-east-1 \
-            hashicorp/terraform:1.12 sh -c '
+            hashicorp/terraform:1.12 -c '
               terraform init -input=false \
                 -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
                 -backend-config="region=us-east-1" &&
